@@ -1,8 +1,8 @@
-(function(){
+(function () {
 
   const CLUES = {
     "/monaco-16": { accept:["europe"], next:"/vienna-17" },
-    "/vienna-17": { accept:[""], next:"/sydney-18" },
+    "/vienna-17": { accept:["4","four"], next:"/sydney-18" },
     "/sydney-18": { accept:[""], next:"/havana-19" },
     "/havana-19": { accept:[""], next:"/boston-20" },
 
@@ -14,45 +14,58 @@
     "/dublin-24": { accept:[""], next:"/moscow-25" },
     "/moscow-25": { accept:[""], next:"/madrid-26" },
     "/madrid-26": { accept:[""], next:"/lisbon-27" },
-    "/lisbon-27": { accept:[""], next:"/prague-28" },
 
+    "/lisbon-27": { accept:[""], next:"/prague-28" },
     "/prague-28": { accept:[""], next:"/zurich-29" },
     "/zurich-29": { accept:[""], next:"/geneva-30" },
-    "/geneva-30": { accept:[""], next:"/oxford-31" },
 
+    "/geneva-30": { accept:[""], next:"/oxford-31" },
     "/oxford-31": { accept:[""], next:"/toledo-32" },
     "/toledo-32": { accept:[""], next:"/dallas-33" },
+
     "/dallas-33": { accept:[""], next:"/denver-34" },
-
     "/denver-34": { accept:[""], next:"/manila-35" },
-    "/manila-35": { accept:[""], next:"/cannes-36" },
 
-    "/cannes-36": { accept:[""], next:null } // end
+    "/manila-35": { accept:[""], next:"/cannes-36" },
+    "/cannes-36": { accept:[""], next:null }
   };
 
   const cfg = CLUES[location.pathname];
   if (!cfg) return;
 
   const norm = s =>
-    (s || "").trim().toLowerCase().replace(/\s+/g," ");
+    (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
-  document.addEventListener("DOMContentLoaded", ()=>{
-    const form  = document.getElementById("clueForm");
-    const input = document.getElementById("answer");
-    const nope  = document.getElementById("nopeBox");
-    if (!form || !input || !nope) return;
+  document.addEventListener("DOMContentLoaded", () => {
 
-    form.addEventListener("submit", e=>{
+    const form   = document.getElementById("clueForm");
+    const input  = document.getElementById("answer");
+    const nope   = document.getElementById("nopeBox");
+    const button = form?.querySelector("button");
+
+    if (!form || !input || !nope || !button) return;
+
+    // HARD SAFETY: enable only once JS is live
+    button.disabled = false;
+
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (cfg.accept.includes(norm(input.value))) {
-        if (cfg.next) location.href = cfg.next;
-      } else {
-        nope.classList.add("is-on");
-        input.select();
+
+      const val = norm(input.value);
+
+      if (cfg.accept.includes(val)) {
+        if (cfg.next) {
+          window.location.assign(cfg.next);
+        }
+        return;
       }
+
+      nope.classList.add("is-on");
+      input.focus();
+      input.select();
     });
 
-    input.addEventListener("input", ()=>{
+    input.addEventListener("input", () => {
       nope.classList.remove("is-on");
     });
   });
