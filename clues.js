@@ -1,76 +1,78 @@
-(function(){
-
+(function () {
   const CLUES = {
-    "/monaco-16": { accept:["europe"], next:"/vienna-17" },
-    "/vienna-17": { accept:[""], next:"/sydney-18" },
-    "/sydney-18": { accept:[""], next:"/havana-19" },
-    "/havana-19": { accept:[""], next:"/boston-20" },
+    "/monaco-16": { accept: ["europe"], next: "/vienna-17" },
+    "/vienna-17": { accept: [""], next: "/sydney-18" },
+    "/sydney-18": { accept: [""], next: "/havana-19" },
+    "/havana-19": { accept: [""], next: "/boston-20" },
 
-    "/boston-20": { accept:[""], next:"/napoli-21" },
-    "/napoli-21": { accept:[""], next:"/berlin-22" },
-    "/berlin-22": { accept:[""], next:"/athens-23" },
-    "/athens-23": { accept:[""], next:"/dublin-24" },
+    "/boston-20": { accept: [""], next: "/napoli-21" },
+    "/napoli-21": { accept: [""], next: "/berlin-22" },
+    "/berlin-22": { accept: [""], next: "/athens-23" },
+    "/athens-23": { accept: [""], next: "/dublin-24" },
 
-    "/dublin-24": { accept:[""], next:"/moscow-25" },
-    "/moscow-25": { accept:[""], next:"/madrid-26" },
-    "/madrid-26": { accept:[""], next:"/lisbon-27" },
-    "/lisbon-27": { accept:[""], next:"/prague-28" },
+    "/dublin-24": { accept: [""], next: "/moscow-25" },
+    "/moscow-25": { accept: [""], next: "/madrid-26" },
+    "/madrid-26": { accept: [""], next: "/lisbon-27" },
+    "/lisbon-27": { accept: [""], next: "/prague-28" },
 
-    "/prague-28": { accept:[""], next:"/zurich-29" },
-    "/zurich-29": { accept:[""], next:"/geneva-30" },
-    "/geneva-30": { accept:[""], next:"/oxford-31" },
+    "/prague-28": { accept: [""], next: "/zurich-29" },
+    "/zurich-29": { accept: [""], next: "/geneva-30" },
+    "/geneva-30": { accept: [""], next: "/oxford-31" },
 
-    "/oxford-31": { accept:[""], next:"/toledo-32" },
-    "/toledo-32": { accept:[""], next:"/dallas-33" },
-    "/dallas-33": { accept:[""], next:"/denver-34" },
+    "/oxford-31": { accept: [""], next: "/toledo-32" },
+    "/toledo-32": { accept: [""], next: "/dallas-33" },
+    "/dallas-33": { accept: [""], next: "/denver-34" },
 
-    "/denver-34": { accept:[""], next:"/manila-35" },
-    "/manila-35": { accept:[""], next:"/cannes-36" },
+    "/denver-34": { accept: [""], next: "/manila-35" },
+    "/manila-35": { accept: [""], next: "/cannes-36" },
 
-    "/cannes-36": { accept:[""], next:null }
+    "/cannes-36": { accept: [""], next: null },
   };
 
-  const cfg = CLUES[location.pathname];
+  // Normalise pathname to avoid trailing-slash mismatches
+  const path = (location.pathname || "").replace(/\/+$/, "") || "/";
+  const cfg = CLUES[path];
   if (!cfg) return;
 
-  const norm = s => (s || "").trim().toLowerCase().replace(/\s+/g," ");
+  const norm = (s) => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
-  function forceEnable(btn){
+  function forceEnable(btn) {
     if (!btn) return;
     btn.disabled = false;
     btn.removeAttribute("disabled");
     btn.style.pointerEvents = "auto";
     btn.style.opacity = "1";
     btn.style.filter = "none";
+    btn.style.cursor = "pointer";
   }
 
-  document.addEventListener("DOMContentLoaded", ()=>{
-    const form  = document.getElementById("clueForm");
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("clueForm");
     const input = document.getElementById("answer");
-    const nope  = document.getElementById("nopeBox");
+    const nope = document.getElementById("nopeBox");
     if (!form || !input || !nope) return;
 
-    const btn = form.querySelector('button[type="submit"]') || form.querySelector("button");
+    const btn =
+      form.querySelector('button[type="submit"]') || form.querySelector("button");
     forceEnable(btn);
 
-    form.addEventListener("submit", e=>{
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-      forceEnable(btn); // Webstudio sometimes disables on submit
+      forceEnable(btn);
 
       if (cfg.accept.includes(norm(input.value))) {
         if (cfg.next) location.href = cfg.next;
       } else {
         nope.classList.add("is-on");
-        input.focus({ preventScroll:true });
+        input.focus({ preventScroll: true });
         input.select();
         forceEnable(btn);
       }
     });
 
-    input.addEventListener("input", ()=>{
+    input.addEventListener("input", () => {
       nope.classList.remove("is-on");
-      forceEnable(btn); // re-enable immediately while typing
+      forceEnable(btn);
     });
   });
-
 })();
