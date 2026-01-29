@@ -1,47 +1,69 @@
-(function () {
-  "use strict";
-
-  const norm = s => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
-
-  function show(id){
-    document.querySelectorAll("[data-screen]").forEach(el => {
-      el.hidden = el.id !== id;
-    });
-    window.scrollTo(0,0);
+// ===================== DATA =====================
+const clues = [
+  {
+    number: 16,
+    question: "Which continent is Spain in?",
+    answer: "europe",
+    image: "images/clue16.jpg"
+  },
+  {
+    number: 17,
+    question: "What is the capital of France?",
+    answer: "paris",
+    image: "images/clue17.jpg"
   }
+];
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // Start state
-    show("welcome");
+let currentIndex = 0;
 
-    // Start button
-    document.querySelector("[data-start]")
-      .addEventListener("click", () => show("clue16"));
+// ===================== ELEMENTS =====================
+const welcome = document.getElementById("welcome");
+const clueScreen = document.getElementById("clueScreen");
 
-    // Clue forms
-    document.querySelectorAll("[data-clue-form]").forEach(form => {
-      const input  = form.querySelector("input");
-      const button = form.querySelector("button");
-      const nope   = form.querySelector("[data-nope]");
+const titleEl = document.getElementById("clueTitle");
+const questionEl = document.getElementById("clueQuestion");
+const imageEl = document.getElementById("clueImage");
+const form = document.getElementById("clueForm");
+const answerInput = document.getElementById("answer");
+const nopeBox = document.getElementById("nopeBox");
+const submitBtn = form.querySelector("button");
 
-      const answers = (form.dataset.answers || "").split("|").map(norm);
-      const next    = form.dataset.next;
+// ===================== LOAD CLUE =====================
+function loadClue(i){
+  currentIndex = i;
+  const c = clues[i];
 
-      if (button) button.disabled = true;
-      if (input) input.addEventListener("input", () => button.disabled = false);
+  titleEl.textContent = "Clue " + c.number;
+  questionEl.textContent = c.question;
+  imageEl.textContent = c.image ? "" : "Image placeholder";
+  if(c.image) imageEl.style.backgroundImage = `url(${c.image})`;
 
-      form.addEventListener("submit", e => {
-        e.preventDefault();
+  answerInput.value = "";
+  nopeBox.classList.remove("is-on");
+  submitBtn.disabled = false;
+}
 
-        if (answers.includes(norm(input.value))) {
-          show(next);
-        } else if (nope) {
-          nope.classList.remove("is-on");
-          void nope.offsetWidth;
-          nope.classList.add("is-on");
-          input.select();
-        }
-      });
-    });
-  });
-})();
+// ===================== START =====================
+document.getElementById("startBtn").addEventListener("click", () => {
+  welcome.style.display = "none";
+  clueScreen.style.display = "block";
+  loadClue(0); // start at clue 16
+});
+
+// ===================== SUBMIT =====================
+form.addEventListener("submit", e => {
+  e.preventDefault();
+
+  const user = answerInput.value.trim().toLowerCase();
+  const correct = clues[currentIndex].answer.toLowerCase();
+
+  if(user === correct){
+    nopeBox.classList.remove("is-on");
+
+    if(currentIndex + 1 < clues.length){
+      loadClue(currentIndex + 1);
+    }
+  } else {
+    nopeBox.classList.add("is-on");
+  }
+});
