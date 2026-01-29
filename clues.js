@@ -4,18 +4,17 @@
   const norm = s => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
   function show(id){
-    document.querySelectorAll("[data-screen]").forEach(s => {
-      s.hidden = s.id !== id;
+    document.querySelectorAll("[data-screen]").forEach(el => {
+      el.hidden = el.id !== id;
     });
+    window.scrollTo(0, 0);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // start on welcome
     show("welcome");
 
-    document.querySelectorAll("[data-start]").forEach(btn => {
-      btn.addEventListener("click", () => show(btn.dataset.start));
-    });
+    document.querySelector("[data-start]")
+      .addEventListener("click", () => show("clue16"));
 
     document.querySelectorAll("[data-clue-form]").forEach(form => {
       const input  = form.querySelector("input");
@@ -26,7 +25,6 @@
       const next    = form.dataset.next;
 
       button.disabled = true;
-
       input.addEventListener("input", () => button.disabled = false);
 
       form.addEventListener("submit", e => {
