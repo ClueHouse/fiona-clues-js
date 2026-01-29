@@ -1,78 +1,46 @@
 (function () {
-  const CLUES = {
-    "/monaco-16": { accept: ["europe"], next: "/vienna-17" },
-    "/vienna-17": { accept: [""], next: "/sydney-18" },
-    "/sydney-18": { accept: [""], next: "/havana-19" },
-    "/havana-19": { accept: [""], next: "/boston-20" },
+  "use strict";
 
-    "/boston-20": { accept: [""], next: "/napoli-21" },
-    "/napoli-21": { accept: [""], next: "/berlin-22" },
-    "/berlin-22": { accept: [""], next: "/athens-23" },
-    "/athens-23": { accept: [""], next: "/dublin-24" },
+  const norm = s => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
-    "/dublin-24": { accept: [""], next: "/moscow-25" },
-    "/moscow-25": { accept: [""], next: "/madrid-26" },
-    "/madrid-26": { accept: [""], next: "/lisbon-27" },
-    "/lisbon-27": { accept: [""], next: "/prague-28" },
-
-    "/prague-28": { accept: [""], next: "/zurich-29" },
-    "/zurich-29": { accept: [""], next: "/geneva-30" },
-    "/geneva-30": { accept: [""], next: "/oxford-31" },
-
-    "/oxford-31": { accept: [""], next: "/toledo-32" },
-    "/toledo-32": { accept: [""], next: "/dallas-33" },
-    "/dallas-33": { accept: [""], next: "/denver-34" },
-
-    "/denver-34": { accept: [""], next: "/manila-35" },
-    "/manila-35": { accept: [""], next: "/cannes-36" },
-
-    "/cannes-36": { accept: [""], next: null },
-  };
-
-  // Normalise pathname to avoid trailing-slash mismatches
-  const path = (location.pathname || "").replace(/\/+$/, "") || "/";
-  const cfg = CLUES[path];
-  if (!cfg) return;
-
-  const norm = (s) => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
-
-  function forceEnable(btn) {
-    if (!btn) return;
-    btn.disabled = false;
-    btn.removeAttribute("disabled");
-    btn.style.pointerEvents = "auto";
-    btn.style.opacity = "1";
-    btn.style.filter = "none";
-    btn.style.cursor = "pointer";
+  function show(id){
+    document.querySelectorAll("[data-screen]").forEach(s => {
+      s.hidden = s.id !== id;
+    });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("clueForm");
-    const input = document.getElementById("answer");
-    const nope = document.getElementById("nopeBox");
-    if (!form || !input || !nope) return;
+    // start on welcome
+    show("welcome");
 
-    const btn =
-      form.querySelector('button[type="submit"]') || form.querySelector("button");
-    forceEnable(btn);
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      forceEnable(btn);
-
-      if (cfg.accept.includes(norm(input.value))) {
-        if (cfg.next) location.href = cfg.next;
-      } else {
-        nope.classList.add("is-on");
-        input.focus({ preventScroll: true });
-        input.select();
-        forceEnable(btn);
-      }
+    document.querySelectorAll("[data-start]").forEach(btn => {
+      btn.addEventListener("click", () => show(btn.dataset.start));
     });
 
-    input.addEventListener("input", () => {
-      nope.classList.remove("is-on");
-      forceEnable(btn);
+    document.querySelectorAll("[data-clue-form]").forEach(form => {
+      const input  = form.querySelector("input");
+      const button = form.querySelector("button");
+      const nope   = form.querySelector("[data-nope]");
+
+      const answers = (form.dataset.answers || "").split("|").map(norm);
+      const next    = form.dataset.next;
+
+      button.disabled = true;
+
+      input.addEventListener("input", () => button.disabled = false);
+
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+
+        if (answers.includes(norm(input.value))) {
+          show(next);
+        } else {
+          nope.classList.remove("is-on");
+          void nope.offsetWidth;
+          nope.classList.add("is-on");
+          input.select();
+        }
+      });
     });
   });
 })();
